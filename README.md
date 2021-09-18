@@ -48,3 +48,15 @@ uci commit
 ```
 /etc/init.d/drcomctl enable
 ```
+
+## 如何从源码构建 ipk 包
+
+链接或复制该文件夹到 [OpenWrt SDK](https://openwrt.org/docs/guide-developer/using_the_sdk) 的 `package/cqu-drcom-openwrt`，在 OpenWrt SDK 目录运行
+
+```bash
+make package/cqu-drcom-openwrt/compile
+```
+
+之后便可在 `bin/packages/*/base/` 下得到 `cqu-drcom` ipk 包。
+
+
