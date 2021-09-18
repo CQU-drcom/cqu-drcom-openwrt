@@ -1,0 +1,17 @@
+#!/bin/sh /etc/rc.common
+START=99
+
+DRCOM_PID=/var/run/drcom-wrapper.pid
+filter_regex='^\[(keep(-|_)alive(1|2))\] (send|recv)|^\[login] (send|recv)|^\[(DEBUG|challenge|mkpkt)|^\[login\] (send|recv)|^password:|^[0-9a-z]+$|^package_tail'
+
+start() {
+    if [ -e "$DRCOM_PID" ] && [ -n "$(cat "$DRCOM_PID")" ]; then
+        stop
+    fi
+    { stdbuf -o L -e L /usr/libexec/drcom.sh 2>&3 | stdbuf -o L grep -Ev "$filter_regex" | logger -t drcom.info ;} 3>&1 | logger -t drcom.error &
+}
+
+stop() {
+    kill $(cat "$DRCOM_PID")
+    echo > "$DRCOM_PID"
+}

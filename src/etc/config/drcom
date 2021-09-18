@@ -1,0 +1,17 @@
+
+config protocol
+        option name 'huxi'
+        option config '/usr/share/drcom/huxi.conf'
+
+config protocol
+        option name 'a'
+        option config '/usr/share/drcom/a.conf'
+
+config protocol
+        option name 'b'
+        option config '/usr/share/drcom/b.conf'
+
+config login
+        option protocol 'huxi'
+        option username '20xxxxxx'
+        option password 'xxxxx'

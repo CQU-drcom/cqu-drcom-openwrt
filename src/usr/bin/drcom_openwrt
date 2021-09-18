@@ -1,0 +1,94 @@
+#!/usr/bin/env micropython
+import ure
+import sys
+sys.path.append('/usr/lib/micropython-drcom')
+os = __import__('os')
+
+
+def get_conf_string(string):
+    return os.popen("uci show " + string).read()
+
+
+class Section(dict):
+    _regex = ure.compile(r"""([^\.=]+)\.([^\.=]+)(\.([^\.=]+)=(('[^']*'|\\')+)|=([^'
+]+))
+?""")
+    """
+    1: config
+    2: section
+    3: option=value or =type
+    4: option
+    5: value
+    6: tmp
+    7: type
+    """
+
+    def __init__(self, config, section, type):
+        super().__init__()
+        self.config = config
+        self.section = section
+        self.type = type
+
+    @classmethod
+    def from_conf(Section, string):
+        section = None
+        while string:
+            match = Section._regex.match(string)
+            if not match:
+                raise ValueError("Unexpected config string!")
+            string = string[len(match.group(0)):]
+            if match.group(7):
+                if section:
+                    yield section
+                section = Section(match.group(1),
+                                  match.group(2),
+                                  match.group(7))
+            else:
+                value = []
+                quoted = False
+                escaped = False
+                for i in match.group(5):
+                    if quoted:
+                        if i == "'":
+                            quoted = False
+                        else:
+                            value.append(i)
+                    elif escaped:
+                        if i == "'":
+                            value.append(i)
+                            escaped = False
+                        else:
+                            raise ValueError(
+                                "Unexpected config string: escaped char \"" + i + "\"!")
+                    else:
+                        if i == "\\":
+                            escaped = True
+                        elif i == "'":
+                            quoted = True
+                        else:
+                            raise ValueError(
+                                "Unexpected config string: unquoted char \"" + i + "\"!")
+                section[match.group(4)] = ''.join(value)
+        yield section
+
+
+if __name__ == "__main__":
+    protocols = {}
+    conf = Section.from_conf(get_conf_string("drcom"))
+    login = None
+    for i in conf:
+        if i.type == 'protocol':
+            protocols[i['name']] = i
+        elif i.type == 'login':
+            login = i
+    tmp_config_file = open('/tmp/drcom.conf', 'w')
+    with open(protocols[login['protocol']]['config']) as f:
+        tmp_config_file.write(f.read())
+    tmp_config_file.write('\nusername = "'+login['username']+'"')
+    tmp_config_file.write("\npassword = '''")
+    tmp_config_file.write(
+        login["password"].replace('\\', '\\\\').replace("'", "\\'"))
+    tmp_config_file.write("'''\n")
+    tmp_config_file.close()
+    os.execvp("drcom-wired", ("drcom-wired", '/tmp/drcom.conf'))
+
