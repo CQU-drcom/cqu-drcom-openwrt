@@ -4,7 +4,7 @@
 
 ## 安装
 
-依赖于不在软件源中的包 [`micropython-drcom-with-lib`](https://github.com/Hagb/micropython-drcom/releases) 需提前手动下载并安装。
+依赖于不在软件源中的包 [`micropython-drcom-with-lib`](https://github.com/CQU-drcom/micropython-drcom/releases) 需提前手动下载并安装。
 
 之后即可安装 `cqu-drcom` 包。
 
