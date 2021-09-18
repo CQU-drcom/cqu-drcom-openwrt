@@ -12,7 +12,7 @@ define Package/cqu-drcom
 	SECTION:=net
 	CATEGORY:=Network
 	TITLE:=DrCOM unofficial client for CQU
-	URL:=https://github.com/Hagb/micropython-drcom
+	URL:=https://github.com/CQU-drcom/cqu-drcom-openwrt
 	DEPENDS:=+micropython-drcom-with-lib +coreutils-stdbuf
 	PKGARCH:=all
 endef
